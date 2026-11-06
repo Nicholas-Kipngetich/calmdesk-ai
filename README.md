@@ -21,7 +21,7 @@ demo video, and setup instructions.)*
 | 3 | User interface | ✅ Complete |
 | 4 | SmartSpectra integration | ✅ Complete — official renderer SDK wired, camera preview live; live authorized session pending a network/lighting-friendly environment (see `docs/INTEGRATION-NOTES.md`) |
 | 5 | Intelligent adaptation | ✅ Complete |
-| 6 | Session history & privacy | ⬜ Not started |
+| 6 | Session history & privacy | ✅ Complete |
 | 7 | Testing | ⬜ Not started |
 | 8 | Final presentation | ⬜ Not started |
 
@@ -33,9 +33,24 @@ demo video, and setup instructions.)*
 - **Node.js** — runtime and backend processes
 - **Presage SmartSpectra SDK** — live physiological measurements
 - **Recharts** — visualization of physiological measurements
-- **SQLite** — optional local session history
+- **SQLite** — not used; see "Local data storage" below
 
 ## Important Notes
+
+### Local data storage (Phase 6)
+
+- Session history stores **summaries only** (duration, mode, averages over trusted
+  readings, good-signal seconds). Raw camera frames, video, and images are **never
+  stored**.
+- Data lives locally in the app's data folder (shown in Settings → data location):
+  `privacy.json` (consent + history preference) and `session-history.json`.
+- **No SQLite/native database**: plain, inspectable JSON keeps the app buildable
+  everywhere with zero native-module friction, and makes "what do you store?" a
+  file anyone can open.
+- Consent is explicit and blocking: the app explains everything on first launch;
+  declining keeps the app usable but disables monitoring. Consent and history
+  recording are both toggleable, and "Delete all history" truly empties the store.
+- SmartSpectra SDK **telemetry is disabled** (`enableTelemetry: false`).
 
 - CalmDesk AI is **not a medical application**. It does not diagnose, treat, or detect medical or
   psychological conditions.

@@ -96,3 +96,40 @@ export interface SignalSource {
 export type SessionMode = 'focus' | 'breathing' | 'break'
 
 export type ViewKey = 'dashboard' | 'breathing' | 'break' | 'history' | 'settings'
+
+/* ---------------- Session history (Feature: local, private) ---------------- */
+
+/**
+ * A stored record of ONE monitoring session. Deliberately a summary only:
+ * no raw frames, no images, no video, no per-second timeline - just what
+ * the user needs to see their own trends. Stored locally by the main
+ * process; the renderer asks over allowlisted IPC.
+ */
+export interface SessionSummary {
+  id: string
+  /** 'live' = camera/SmartSpectra, 'demo' = clearly-labelled offline demo. */
+  source: 'live' | 'demo'
+  mode: SessionMode
+  /** ms since Unix epoch */
+  startedAt: number
+  endedAt: number
+  durationSeconds: number
+  /** How many frames the watcher observed in total. */
+  frames: number
+  /** Seconds the overall signal was 'valid' during the session. */
+  validSeconds: number
+  /** Averages over VALID measurements only (null if none were observed). */
+  avgBreathing: number | null
+  avgPulse: number | null
+  status: 'completed' | 'interrupted'
+}
+
+/** Privacy preferences owned by the main process, persisted locally. */
+export interface PrivacySettings {
+  /** First-run camera + data consent accepted (false keeps monitoring off). */
+  consented: boolean
+  /** When false, sessions are never written to local history. */
+  historyEnabled: boolean
+  /** Absolute path of CalmDesk's local data folder (shown in Settings). */
+  dataPath: string
+}

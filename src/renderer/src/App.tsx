@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ViewKey } from '../../shared/types'
 import { MonitoringProvider, useMonitoring } from './state/MonitoringContext'
 import { Sidebar } from './components/Sidebar'
+import { ConsentGate } from './components/ConsentGate'
 import { DashboardView } from './views/DashboardView'
 import { BreathingView } from './views/BreathingView'
 import { BreakView } from './views/BreakView'
@@ -16,7 +17,7 @@ const VIEW_TO_MODE: Partial<Record<ViewKey, 'focus' | 'breathing' | 'break'>> = 
 }
 
 function Shell(): React.JSX.Element {
-  const { setMode, quiet } = useMonitoring()
+  const { setMode, quiet, privacy, updatePrivacy } = useMonitoring()
   const [view, setView] = useState<ViewKey>('dashboard')
 
   const selectView = (next: ViewKey): void => {
@@ -35,6 +36,12 @@ function Shell(): React.JSX.Element {
         {view === 'history' && <HistoryView />}
         {view === 'settings' && <SettingsView />}
       </main>
+      <ConsentGate
+        privacy={privacy}
+        onDecide={(consented) => {
+          void updatePrivacy({ consented })
+        }}
+      />
     </div>
   )
 }
