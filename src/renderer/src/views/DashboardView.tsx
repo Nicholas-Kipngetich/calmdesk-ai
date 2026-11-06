@@ -1,8 +1,9 @@
+import { useEffect, useRef, useState } from 'react'
 import { useMonitoring } from '../state/MonitoringContext'
 import { MetricCard } from '../components/MetricCard'
 import { PreviewCard } from '../components/PreviewCard'
 import { QualityChip } from '../components/QualityChip'
-import type { MonitoringStatus, SignalQualityStatus } from '../../../shared/types'
+import type { MonitoringStatus, SignalQualityStatus, ViewKey } from '../../../shared/types'
 
 function formatSession(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60)
@@ -43,9 +44,48 @@ function guidanceText(status: MonitoringStatus, quality: SignalQualityStatus, hi
   return 'Preparing the signal pipeline — keep your face centred.'
 }
 
-export function DashboardView(): React.JSX.Element {
-  const { status, errorMessage, frame, stream, sessionSeconds, startMonitoring, stopMonitoring } =
-    useMonitoring()
+/**
+ * Feature 5 (adaptive prompt): if a VALID measured breathing rate stays
+ * elevated (>= 16 breaths/min) across a sustained window of consecutive
+ * frames, offer - never force - the breathing guide. Dismissible; no
+ * auto-navigation; grounded only in trusted measurements.
+ */
+const ELEVATED_BPM = 16
+const SUSTAINED_FRAMES = 20
+
+interface DashboardViewProps {
+  onNavigate?: (view: ViewKey) => void
+}
+
+export function DashboardView({ onNavigate }: DashboardViewProps): React.JSX.Element {
+  const {
+    status,
+    errorMessage,
+    frame,
+    stream,
+    sessionSeconds,
+    demoMode,
+    startMonitoring,
+    startDemoMonitoring,
+    stopMonitoring
+  } = useMonitoring()
+  const [suggestBreathing, setSuggestBreathing] = useState(false)
+  const elevatedFrames = useRef(0)
+
+  useEffect(() => {
+    const br = frame?.breathingRate
+    const elevated = br?.quality === 'valid' && br.value >= ELEVATED_BPM
+    elevatedFrames.current = elevated ? elevatedFrames.current + 1 : 0
+    // Suggest only once the elevation is SUSTAINED; stay silent otherwise.
+    if (elevatedFrames.current >= SUSTAINED_FRAMES) setSuggestBreathing(true)
+  }, [frame])
+
+  const dismissSuggestion = (): void => {
+    // Reset the counter so the dismissed card does not instantly reappear
+    // while the same sustained elevation continues.
+    elevatedFrames.current = 0
+    setSuggestBreathing(false)
+  }
 
   const live = status === 'monitoring' || status === 'starting'
   const quality: SignalQualityStatus =
@@ -75,11 +115,47 @@ export function DashboardView(): React.JSX.Element {
         </div>
       </header>
 
+      {demoMode && status === 'monitoring' && (
+        <div className="card demo-banner">
+          <p className="guidance-text">
+            <strong>Demo signal source active.</strong> These numbers are simulated and clearly
+            labelled — they are not camera measurements. Start real monitoring again whenever
+            you like.
+          </p>
+        </div>
+      )}
+
       {status === 'error' && errorMessage && (
         <div className="card error-card">
           <p className="guidance-text">
             <strong>Signal issue:</strong> {errorMessage}
           </p>
+          <div className="head-actions error-actions">
+            <button type="button" className="btn" onClick={startDemoMonitoring}>
+              Continue in demo mode
+            </button>
+          </div>
+        </div>
+      )}
+
+      {suggestBreathing && status === 'monitoring' && (
+        <div className="card suggest-card">
+          <p className="guidance-text">
+            Your measured breathing has been <strong>elevated</strong> for a while. A short
+            guided pause can help you reset — it's entirely optional.
+          </p>
+          <div className="head-actions error-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => onNavigate?.('breathing')}
+            >
+              Open breathing guide
+            </button>
+            <button type="button" className="btn" onClick={dismissSuggestion}>
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
@@ -98,7 +174,7 @@ export function DashboardView(): React.JSX.Element {
       </div>
 
       <div className="cards-row">
-        <PreviewCard stream={stream} />
+        <PreviewCard stream={demoMode ? null : stream} />
 
         <div className="card guidance-card">
           <div className="guidance-head">
@@ -106,7 +182,9 @@ export function DashboardView(): React.JSX.Element {
             <span className="metric-label">Capture quality</span>
           </div>
           <p className="guidance-text">
-            {guidanceText(status, quality, frame?.validation?.hint ?? null)}
+            {demoMode
+              ? 'Demo mode: simulated signal timeline (processing → valid → occasional poor patch) so every state can be exercised offline.'
+              : guidanceText(status, quality, frame?.validation?.hint ?? null)}
           </p>
         </div>
       </div>

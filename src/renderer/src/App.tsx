@@ -29,7 +29,7 @@ function Shell(): React.JSX.Element {
     <div className="layout" data-ambience={quiet ? 'quiet' : currentAmbience(view)}>
       <Sidebar view={view} onSelect={selectView} />
       <main className="content">
-        {view === 'dashboard' && <DashboardView />}
+        {view === 'dashboard' && <DashboardView onNavigate={selectView} />}
         {view === 'breathing' && <BreathingView />}
         {view === 'break' && <BreakView />}
         {view === 'history' && <HistoryView />}

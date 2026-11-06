@@ -16,6 +16,7 @@ import type {
   SignalSource
 } from '../../../shared/types'
 import { SmartSpectraSource } from '../sources/smartSpectraSource'
+import { DemoSignalSource } from '../sources/demoSignalSource'
 
 /**
  * MonitoringContext - the single source of truth for live signal state,
@@ -34,7 +35,10 @@ interface MonitoringContextValue {
   sessionSeconds: number
   mode: SessionMode
   quiet: boolean
+  /** True while the clearly-labelled offline demo source is active. */
+  demoMode: boolean
   startMonitoring: () => void
+  startDemoMonitoring: () => void
   stopMonitoring: () => void
   setMode: (mode: SessionMode) => void
   setQuiet: (quiet: boolean) => void
@@ -52,6 +56,7 @@ export function MonitoringProvider({ children }: { children: ReactNode }): React
   const [sessionSeconds, setSessionSeconds] = useState(0)
   const [mode, setModeState] = useState<SessionMode>('focus')
   const [quiet, setQuiet] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
 
   // Load runtime configuration once (API key via private IPC).
   useEffect(() => {
@@ -124,7 +129,25 @@ export function MonitoringProvider({ children }: { children: ReactNode }): React
     sourceRef.current = null
     setFrame(null)
     setStream(null)
+    setDemoMode(false)
     setStatus('idle')
+  }, [])
+
+  /**
+   * Clearly-labelled offline fallback (Phase 5 development + resilience UX):
+   * the same SignalFrame contract goes through the UI, but the dashboard
+   * shows an explicit Demo banner so demo data can never masquerade as a
+   * live measurement.
+   */
+  const startDemoMonitoring = useCallback((): void => {
+    if (sourceRef.current) return
+    const source = new DemoSignalSource()
+    sourceRef.current = source
+    source.subscribe(setFrame)
+    source.start()
+    setStatus('monitoring')
+    setDemoMode(true)
+    setErrorMessage(null)
   }, [])
 
   const setMode = useCallback((next: SessionMode): void => {
@@ -155,9 +178,11 @@ export function MonitoringProvider({ children }: { children: ReactNode }): React
       sessionSeconds,
       mode,
       quiet,
+      demoMode,
       startMonitoring: () => {
         void startMonitoring()
       },
+      startDemoMonitoring,
       stopMonitoring,
       setMode,
       setQuiet
@@ -170,7 +195,9 @@ export function MonitoringProvider({ children }: { children: ReactNode }): React
       sessionSeconds,
       mode,
       quiet,
+      demoMode,
       startMonitoring,
+      startDemoMonitoring,
       stopMonitoring,
       setMode,
       setQuiet

@@ -222,11 +222,13 @@ export class SmartSpectraSource implements SignalSource {
     }
   }
 
-  private async onSdkError(
+  // Web SDK event callbacks receive the handler without a `this` receiver,
+  // so all handlers are arrow properties, not prototype methods.
+  private onSdkError = async (
     code: SmartSpectraErrorCodeValue,
     message: string,
     retryable: boolean
-  ): Promise<void> {
+  ): Promise<void> => {
     // Late events can arrive while/after teardown - ignore them.
     if (!this.active || !this.sdk) return
     // Graceful degradation: a key without cardio support fails around

@@ -528,6 +528,20 @@ body {
   font-size: 11.5px;
 }
 
+/* =================== Demo banner / suggestion / errors =================== */
+
+.demo-banner {
+  border-color: var(--blue-400);
+}
+
+.error-actions {
+  margin-top: 10px;
+}
+
+.suggest-card {
+  border-color: var(--lavender-300);
+}
+
 /* =================== Error surface =================== */
 
 .error-card {
