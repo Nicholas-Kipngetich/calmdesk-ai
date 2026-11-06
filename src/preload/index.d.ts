@@ -6,4 +6,5 @@ declare global {
   }
 }
 
-export {}
+export { AppConfig } from '../shared/types'
+

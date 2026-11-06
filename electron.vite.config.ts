@@ -12,7 +12,9 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()]
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    // Sandboxed preloads cannot `require()` external packages at runtime,
+    // so exclude the SDK from externalization to bundle it inline.
+    plugins: [externalizeDepsPlugin({ exclude: ['@smartspectra/node-sdk'] })]
   },
   renderer: {
     plugins: [react()]

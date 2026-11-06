@@ -36,7 +36,7 @@ export class DemoSignalSource implements SignalSource {
   private breathing = 14.5
   private pulse = 71
 
-  start(): void {
+  async start(): Promise<void> {
     if (this.timer !== null) return
     this.timer = window.setInterval(() => this.tick(), TICK_MS)
   }
@@ -89,7 +89,8 @@ export class DemoSignalSource implements SignalSource {
       timestamp,
       overallQuality: this.quality,
       breathingRate,
-      pulseRate
+      pulseRate,
+      validation: null
     }
 
     for (const listener of this.listeners) listener(frame)

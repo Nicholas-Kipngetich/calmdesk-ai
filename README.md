@@ -16,10 +16,10 @@ demo video, and setup instructions.)*
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 1 | Development environment | 🚧 In progress |
-| 2 | Electron + React foundation | ⬜ Not started |
-| 3 | User interface | ⬜ Not started |
-| 4 | SmartSpectra integration | ⬜ Not started |
+| 1 | Development environment | ✅ Complete |
+| 2 | Electron + React foundation | ✅ Complete |
+| 3 | User interface | ✅ Complete |
+| 4 | SmartSpectra integration | 🚧 In progress — official renderer SDK wired, camera preview live, awaiting first authorized session |
 | 5 | Intelligent adaptation | ⬜ Not started |
 | 6 | Session history & privacy | ⬜ Not started |
 | 7 | Testing | ⬜ Not started |

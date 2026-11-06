@@ -14,6 +14,14 @@ export interface AppInfo {
   platform: string
 }
 
+/** Runtime configuration delivered to the renderer over private IPC. */
+export interface AppConfig {
+  /** Presage SmartSpectra API key (from .env; never committed). */
+  apiKey: string
+  /** Always false in CalmDesk AI - disclosed in README and settings UI. */
+  telemetryEnabled: boolean
+}
+
 /* ---------------- Signals & measurements ---------------- */
 
 /**
@@ -28,13 +36,28 @@ export type SignalQualityStatus =
   | 'camera-unavailable' // no camera / permission denied
   | 'unavailable' // monitoring off / no measurement available
 
-/** One measurement at a point in time, together with its confidence. */
+/**
+ * One measurement at a point in time, with its confidence.
+ * `confidence` (0-100) and `stable` come from the SmartSpectra metrics
+ * payload. Per official docs, confidence starts at 0 and only becomes
+ * meaningful once a metric's analysis window fills (breathing 30s,
+ * pulse 12s) - so readings before that are 'processing', never 'valid'.
+ */
 export interface QualityMeasurement {
   value: number
   unit: string
   /** ms since Unix epoch */
   timestamp: number
   quality: SignalQualityStatus
+  confidence?: number
+  stable?: boolean
+}
+
+/** The SDK's live capture feedback, surfaced verbatim (official hint string). */
+export interface ValidationInfo {
+  /** Raw SmartSpectra ValidationCode value. */
+  code: number
+  hint: string
 }
 
 /**
@@ -46,6 +69,7 @@ export interface SignalFrame {
   overallQuality: SignalQualityStatus
   breathingRate: QualityMeasurement | null
   pulseRate: QualityMeasurement | null
+  validation: ValidationInfo | null
 }
 
 export type MonitoringStatus =
@@ -56,11 +80,12 @@ export type MonitoringStatus =
   | 'error'
 
 /**
- * Any provider of signal frames. Implemented by DemoSignalSource (Phase 3)
- * and, later, the SmartSpectra adapter (Phase 4) with identical behaviour.
+ * Any provider of signal frames. Implemented by DemoSignalSource (offline
+ * fallback) and the SmartSpectraSource (real SDK, Phase 4) with identical
+ * behaviour.
  */
 export interface SignalSource {
-  start(): void
+  start(): Promise<void>
   stop(): void
   /** Returns an unsubscribe function. */
   subscribe(listener: (frame: SignalFrame) => void): () => void
