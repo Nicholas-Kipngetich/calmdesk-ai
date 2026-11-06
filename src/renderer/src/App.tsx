@@ -1,97 +1,52 @@
-import { useEffect, useState } from 'react'
-import type { AppInfo } from '../../shared/types'
+import { useState } from 'react'
+import type { ViewKey } from '../../shared/types'
+import { MonitoringProvider, useMonitoring } from './state/MonitoringContext'
+import { Sidebar } from './components/Sidebar'
+import { DashboardView } from './views/DashboardView'
+import { BreathingView } from './views/BreathingView'
+import { BreakView } from './views/BreakView'
+import { HistoryView } from './views/HistoryView'
+import { SettingsView } from './views/SettingsView'
 
-/**
- * CalmDesk AI - first React surface.
- *
- * A minimal "foundation verified" screen. It exercises the full secure
- * pipeline: React (renderer) -> calmdesk bridge (preload) -> ipcMain
- * (main process) -> back, rendering the response. If this screen shows real
- * data, the entire architecture is proven end-to-end.
- */
-function App(): React.JSX.Element {
-  const [appInfo, setAppInfo] = useState<AppInfo | null>(null)
+/** Each activity maps to a workspace mode (Feature 4). */
+const VIEW_TO_MODE: Partial<Record<ViewKey, 'focus' | 'breathing' | 'break'>> = {
+  dashboard: 'focus',
+  breathing: 'breathing',
+  break: 'break'
+}
 
-  useEffect(() => {
-    window.calmdesk
-      .getAppInfo()
-      .then(setAppInfo)
-      .catch((err) => console.error('Failed to load app info:', err))
-  }, [])
+function Shell(): React.JSX.Element {
+  const { setMode, quiet } = useMonitoring()
+  const [view, setView] = useState<ViewKey>('dashboard')
+
+  const selectView = (next: ViewKey): void => {
+    setView(next)
+    const linkedMode = VIEW_TO_MODE[next]
+    if (linkedMode) setMode(linkedMode)
+  }
 
   return (
-    <div className="app-shell">
-      <header className="brand">
-        <div className="brand-mark" aria-hidden="true">
-          <div className="brand-ring" />
-          <div className="brand-core" />
-        </div>
-        <div>
-          <h1 className="brand-name">CalmDesk AI</h1>
-          <p className="brand-tagline">A workspace that responds to you.</p>
-        </div>
-      </header>
-
-      <main>
-        <section className="card">
-          <h2 className="card-title">Foundation status</h2>
-          {appInfo ? (
-            <dl className="status-list">
-              <div className="status-row">
-                <dt>Secure bridge (preload IPC)</dt>
-                <dd className="status-ok">Connected</dd>
-              </div>
-              <div className="status-row">
-                <dt>App version</dt>
-                <dd>{appInfo.version}</dd>
-              </div>
-              <div className="status-row">
-                <dt>Electron</dt>
-                <dd>{appInfo.electron}</dd>
-              </div>
-              <div className="status-row">
-                <dt>Main process Node.js</dt>
-                <dd>{appInfo.node}</dd>
-              </div>
-              <div className="status-row">
-                <dt>Platform</dt>
-                <dd>{appInfo.platform}</dd>
-              </div>
-              <div className="status-row">
-                <dt>Renderer Node.js access</dt>
-                <dd className="status-ok">Disabled (by design)</dd>
-              </div>
-              <div className="status-row">
-                <dt>Context isolation</dt>
-                <dd className="status-ok">Enabled</dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="muted">Connecting to the main process…</p>
-          )}
-        </section>
-
-        <section className="card card-ghost">
-          <h2 className="card-title">Next phases</h2>
-          <ul className="roadmap">
-            <li>
-              <strong>Phase 3</strong> — Dashboard, workspace modes, breathing animation
-            </li>
-            <li>
-              <strong>Phase 4</strong> — SmartSpectra live signals
-            </li>
-            <li>
-              <strong>Phase 5</strong> — Signal-confidence intelligence &amp; adaptive workspace
-            </li>
-          </ul>
-        </section>
+    <div className="layout" data-ambience={quiet ? 'quiet' : currentAmbience(view)}>
+      <Sidebar view={view} onSelect={selectView} />
+      <main className="content">
+        {view === 'dashboard' && <DashboardView />}
+        {view === 'breathing' && <BreathingView />}
+        {view === 'break' && <BreakView />}
+        {view === 'history' && <HistoryView />}
+        {view === 'settings' && <SettingsView />}
       </main>
-
-      <footer className="footer muted">
-        Not a medical application. CalmDesk AI does not diagnose or treat any condition.
-      </footer>
     </div>
   )
 }
 
-export default App
+function currentAmbience(view: ViewKey): string {
+  return VIEW_TO_MODE[view] ?? 'focus'
+}
+
+export default function App(): React.JSX.Element {
+  return (
+    <MonitoringProvider>
+      <Shell />
+    </MonitoringProvider>
+  )
+}
