@@ -1,0 +1,214 @@
+/*
+  CalmDesk AI - design system
+  Palette: deep navy, soft blue, lavender, white, subtle gradients.
+*/
+
+:root {
+  --navy-900: #0b1325;
+  --navy-800: #101a33;
+  --navy-700: #16223f;
+  --blue-300: #7ab8f5;
+  --blue-400: #529cf0;
+  --lavender-300: #c3b8f7;
+  --white-90: rgba(255, 255, 255, 0.92);
+  --white-60: rgba(255, 255, 255, 0.6);
+  --white-12: rgba(255, 255, 255, 0.12);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family:
+    'Segoe UI Variable Display',
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--white-90);
+  background:
+    radial-gradient(1100px 620px at 85% -10%, rgba(82, 156, 240, 0.16), transparent 60%),
+    radial-gradient(900px 540px at 0% 110%, rgba(195, 184, 247, 0.12), transparent 55%),
+    linear-gradient(160deg, var(--navy-900) 0%, var(--navy-800) 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 40px;
+  max-width: 980px;
+  margin: 0 auto;
+  animation: rise 0.6s ease-out both;
+}
+
+/* ---------- Brand ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+
+.brand-mark {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.brand-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--blue-300);
+  opacity: 0.55;
+  animation: breathe 6s ease-in-out infinite;
+}
+
+.brand-core {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-400), var(--lavender-300));
+  animation: breathe 6s ease-in-out infinite reverse;
+}
+
+.brand-name {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.brand-tagline {
+  color: var(--white-60);
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--white-12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(122, 184, 245, 0.35);
+}
+
+.card-ghost {
+  background: transparent;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--white-60);
+  margin-bottom: 16px;
+}
+
+/* ---------- Status list ---------- */
+.status-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+}
+
+.status-row:last-child {
+  border-bottom: none;
+}
+
+.status-row dt {
+  color: var(--white-60);
+}
+
+.status-ok {
+  color: var(--blue-300);
+  font-weight: 600;
+}
+
+/* ---------- Roadmap ---------- */
+.roadmap {
+  list-style: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 2;
+  color: var(--white-60);
+}
+
+.roadmap strong {
+  color: var(--lavender-300);
+  font-weight: 600;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  margin-top: auto;
+  font-size: 12.5px;
+  text-align: center;
+  padding-top: 16px;
+}
+
+.muted {
+  color: var(--white-60);
+}
+
+/* ---------- Animations ---------- */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.95;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .brand-ring,
+  .brand-core,
+  .app-shell {
+    animation: none;
+  }
+}
