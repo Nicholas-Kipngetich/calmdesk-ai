@@ -1,0 +1,44 @@
+# ============ CalmDesk AI - Git Ignore ============
+
+# --- Secrets: NEVER commit API keys or environment files ---
+.env
+.env.*
+*.key
+secrets/
+!***secrets**/.gitkeep
+
+# --- Dependencies ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# --- Build outputs ---
+dist/
+dist-electron/
+out/
+build/
+release/
+*.tsbuildinfo
+
+# --- Electron packaging ---
+electron-builder/
+app-builder-bin/
+
+# --- Runtime data (camera recordings, session DB, logs) ---
+data/
+user-data/
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Test & coverage ---
+coverage/
+
+# --- Editor / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
