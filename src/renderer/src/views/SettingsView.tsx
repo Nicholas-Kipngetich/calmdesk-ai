@@ -21,7 +21,10 @@ export function SettingsView(): React.JSX.Element {
       setConfirmDelete('armed')
       return
     }
-    await window.calmdesk.clearHistory()
+    // Treat the renderer as sandboxed: the bridge may be unavailable.
+    if (window.calmdesk) {
+      await window.calmdesk.clearHistory()
+    }
     setConfirmDelete('idle')
   }
 

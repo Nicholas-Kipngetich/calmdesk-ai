@@ -646,6 +646,35 @@ body {
   margin-top: 10px;
 }
 
+/* =================== Crash recovery (Phase 7) =================== */
+
+.crash-screen {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background:
+    radial-gradient(1100px 620px at 85% -10%, rgba(82, 156, 240, 0.16), transparent 60%),
+    linear-gradient(160deg, var(--navy-900) 0%, var(--navy-800) 100%);
+}
+
+.crash-card {
+  max-width: 480px;
+  padding: 24px 26px;
+}
+
+.crash-detail {
+  margin-top: 8px;
+  font-size: 12px;
+  font-family: Consolas, monospace;
+  word-break: break-word;
+}
+
+.crash-card .head-actions {
+  margin-top: 14px;
+}
+
 /* =================== Error surface =================== */
 
 .error-card {

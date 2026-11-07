@@ -58,6 +58,31 @@ demo video, and setup instructions.)*
 - No raw video is recorded or stored.
 - API keys are kept out of source code and out of this public repository.
 
+## Quality & testing (Phase 7)
+
+- **TypeScript strict typecheck** across main, preload, and renderer (`npm run typecheck`)
+  is the build-time gate. No ESLint is configured; the type contract plus runtime
+  hardening below is the project's quality strategy.
+- **Error boundary**: any unexpected renderer error shows a calm recovery screen
+  ("Something went wrong on our side" + Reload) instead of a blank window. Session
+  history lives in the main process and is unaffected by renderer crashes.
+- **Sandboxed-IPC hardening**: every `window.calmdesk` call site in the renderer
+  guards against a missing preload bridge; the main process validates IPC payload
+  shapes before touching the store.
+
+### State matrix exercised during development
+
+| Scenario | Expected UI behaviour |
+|---|---|
+| Monitoring starts | "Processing…" until the metric window fills — no numbers shown |
+| Signal valid | Trusted numbers + confidence/stability surfaced |
+| Capture quality degrades | Guidance with the SDK's own hint string, readings marked untrusted |
+| Auth/network fails at start | Clear error card with built-in demo fallback |
+| Demo source active | Explicit "demo" banner + demo tag on any stored session |
+| Consent withdrawn | Monitoring refuses to start with a clear message; app stays usable |
+| History off / all deleted | Sessions not recorded / store emptied, on-disk verified |
+| Renderer crash | Error boundary recovery screen, history intact on disk |
+
 ## Repository
 
 Public repository: https://github.com/Nicholas-Kipngetich/calmdesk-ai

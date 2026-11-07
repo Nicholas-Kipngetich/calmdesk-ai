@@ -33,7 +33,13 @@ export function HistoryView(): React.JSX.Element {
 
   useEffect(() => {
     let active = true
-    window.calmdesk
+    const api = window.calmdesk
+    // Preload bridge unavailable (or IPC failure): treat as "load error".
+    if (!api) {
+      setSessions(null)
+      return
+    }
+    api
       .listSessions()
       .then((list) => {
         if (active) setSessions(list)
@@ -47,11 +53,12 @@ export function HistoryView(): React.JSX.Element {
   }, [])
 
   const deleteAll = async (): Promise<void> => {
-    if (sessions === null) return
-    await window.calmdesk.clearHistory()
+    const api = window.calmdesk
+    if (!api || sessions === null) return
+    await api.clearHistory()
     // Confirm the deletion actually happened, then adopt the result.
     try {
-      setSessions(await window.calmdesk.listSessions())
+      setSessions(await api.listSessions())
     } catch {
       setSessions([])
     }

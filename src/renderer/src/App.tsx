@@ -3,6 +3,7 @@ import type { ViewKey } from '../../shared/types'
 import { MonitoringProvider, useMonitoring } from './state/MonitoringContext'
 import { Sidebar } from './components/Sidebar'
 import { ConsentGate } from './components/ConsentGate'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { DashboardView } from './views/DashboardView'
 import { BreathingView } from './views/BreathingView'
 import { BreakView } from './views/BreakView'
@@ -52,8 +53,10 @@ function currentAmbience(view: ViewKey): string {
 
 export default function App(): React.JSX.Element {
   return (
-    <MonitoringProvider>
-      <Shell />
-    </MonitoringProvider>
+    <ErrorBoundary>
+      <MonitoringProvider>
+        <Shell />
+      </MonitoringProvider>
+    </ErrorBoundary>
   )
 }
